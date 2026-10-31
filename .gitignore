@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+
+简历写法.txt
+上传到GitHub.txt
+运行步骤.txt

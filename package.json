@@ -1,0 +1,23 @@
+{
+  "name": "photofeed",
+  "version": "1.0.0",
+  "description": "PhotoFeed - 图片瀑布流社区（Vue 3 + Vite 前端 + Node 零依赖后端），主打页面性能优化",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "gen": "node scripts/gen-photos.mjs",
+    "dev": "node scripts/dev-all.mjs",
+    "dev:web": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "node server/api-server.js",
+    "start": "node server/api-server.js"
+  },
+  "dependencies": {
+    "vue": "^3.5.44"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.10",
+    "vite": "^8.3.5"
+  }
+}
