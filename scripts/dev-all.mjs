@@ -104,7 +104,7 @@ if (busy.length) {
   process.exit(1)
 }
 
-console.log(`PhotoFeed 启动中：后端 ${PORT_API} / 前端 ${PORT_WEB}`)
+console.log(`Photo Waterfall 启动中：后端 ${PORT_API} / 前端 ${PORT_WEB}`)
 run('后端', join(ROOT, 'server', 'api-server.js'), [])
 run('前端', VITE_BIN, ['--port', String(PORT_WEB)])
 

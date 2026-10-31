@@ -197,7 +197,7 @@ server.on('error', (e) => {
   if (e.code === 'EADDRINUSE') {
     console.error('')
     console.error(`[后端] 端口 ${PORT} 已被别的程序占用，本进程退出。`)
-    console.error('       多半是你之前已经开着一份 PhotoFeed，或者终端没关干净。')
+    console.error('       多半是你之前已经开着一份 Photo Waterfall，或者终端没关干净。')
     console.error(`       想先释放端口：  taskkill /PID <进程号> /F   （进程号用 netstat -ano | findstr :${PORT} 查）`)
     console.error('')
     process.exit(1)
@@ -206,7 +206,7 @@ server.on('error', (e) => {
 })
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`[后端] PhotoFeed 已启动：http://localhost:${PORT}`)
+  console.log(`[后端] Photo Waterfall 已启动：http://localhost:${PORT}`)
   console.log(`[后端] 接口：/api/meta  /api/photos?keyword=&tag=&page=&pageSize=  /api/more?cursor=&count=`)
   console.log(`[后端] 续接池：${POOL.length} 张去重真实照片（推荐流滚到底时从这里循环取）`)
 })

@@ -20,6 +20,17 @@ const imgSrc = computed(() => imgUrl(props.photo.img, IMG_W, imgH.value))
 
 const lqipSrc = computed(() => imgUrl(props.photo.img, 24, 32, '&blur=200'))
 
+const BIG_W = 1000
+const bigCache = new Set()
+
+function prefetchBig() {
+  const base = props.photo.img
+  if (!base || bigCache.has(base)) return
+  bigCache.add(base)
+  const img = new Image()
+  img.src = `${base}?w=${BIG_W}&h=${Math.round(BIG_W * (props.photo.ratio || 0.75))}&fit=crop`
+}
+
 const cardStyle = computed(() => ({
   width: props.pos.w + 'px',
   height: props.pos.h + 'px',
@@ -40,6 +51,8 @@ const likesText = computed(() => {
     tabindex="0"
     :aria-label="`查看 ${photo.title}，作者 ${photo.author}`"
     @click="emit('open', photo)"
+    @mouseenter="prefetchBig"
+    @focus="prefetchBig"
     @keydown.enter.prevent="emit('open', photo)"
     @keydown.space.prevent="emit('open', photo)"
   >

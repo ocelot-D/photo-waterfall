@@ -1,7 +1,7 @@
 <script setup>
 
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import { usePhotoFeed } from './composables/usePhotoFeed.js'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
+import { usePhotoData } from './composables/usePhotoData.js'
 import { useWaterfall } from './composables/useWaterfall.js'
 import { usePerfMonitor } from './composables/usePerfMonitor.js'
 import { imageStats } from './utils/imageStats.js'
@@ -28,7 +28,7 @@ const {
   loadMore,
   toggleTag,
   clearFilter,
-} = usePhotoFeed()
+} = usePhotoData()
 
 const {
   fps,
@@ -73,6 +73,23 @@ function stepLightbox(d) {
   if (!n || lightboxIndex.value < 0) return
   lightboxIndex.value = (lightboxIndex.value + d + n) % n
 }
+
+const BIG_W = 1000
+const bigPrefetched = new Set()
+
+function prefetchBig(photo) {
+  if (!photo || !photo.img || bigPrefetched.has(photo.img)) return
+  bigPrefetched.add(photo.img)
+  const img = new Image()
+  img.src = `${photo.img}?w=${BIG_W}&h=${Math.round(BIG_W * (photo.ratio || 0.75))}&fit=crop`
+}
+
+watch(lightboxIndex, (i) => {
+  const n = list.value.length
+  if (i < 0 || !n) return
+  prefetchBig(list.value[(i + 1) % n])
+  prefetchBig(list.value[(i - 1 + n) % n])
+})
 
 function setTag(tag) {
   activeTag.value = tag
@@ -126,7 +143,7 @@ onBeforeUnmount(() => {
   <header class="top">
     <div class="top-row">
       <div class="brand">
-        <span class="logo">PhotoFeed</span>
+        <span class="logo">Photo Waterfall</span>
         <span class="sub">图片瀑布流社区 · 性能优化演示 · 照片来自 Pexels 免费图库</span>
       </div>
 

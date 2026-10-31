@@ -1,6 +1,5 @@
 <script setup>
-
-import { computed, onMounted, onBeforeUnmount, ref } from 'vue'
+import { computed, onMounted, onBeforeUnmount, ref, watch } from 'vue'
 
 const props = defineProps({
   photo: { type: Object, required: true },
@@ -15,12 +14,40 @@ let lastFocused = null
 let prevOverflow = ''
 let prevPadding = ''
 
-const imgSrc = computed(() => {
+const THUMB_W = 400
+const BIG_W = 1000
+
+function buildUrl(w) {
   const base = props.photo.img
   if (!base) return ''
-  const h = Math.round(1200 * props.photo.ratio)
-  return `${base}?w=1200&h=${h}&fit=crop`
-})
+  const h = Math.round(w * (props.photo.ratio || 0.75))
+  return `${base}?w=${w}&h=${h}&fit=crop`
+}
+
+const thumbSrc = computed(() => buildUrl(THUMB_W))
+const bigSrc = computed(() => buildUrl(BIG_W))
+
+const loaded = ref(false)
+const failed = ref(false)
+const tick = ref(0)
+
+function reset() {
+  loaded.value = false
+  failed.value = false
+  tick.value = 0
+}
+
+watch(() => props.photo, reset)
+
+function retry() {
+  tick.value++
+  loaded.value = false
+  failed.value = false
+}
+
+const picStyle = computed(() => ({
+  aspectRatio: `1 / ${props.photo.ratio || 0.75}`,
+}))
 
 function onKey(e) {
   if (e.key === 'Escape') emit('close')
@@ -63,9 +90,32 @@ onBeforeUnmount(() => {
     <button class="nav next" aria-label="下一张" @click="emit('next')">›</button>
 
     <figure class="box">
-      <div class="pic">
-        <img :src="imgSrc" :alt="photo.title" />
+      <div class="pic" :style="picStyle">
+        <img v-if="thumbSrc" class="thumb" :class="{ 'is-dim': loaded }" :src="thumbSrc" alt="" aria-hidden="true" />
+
+        <img
+          v-if="bigSrc && !failed"
+          class="full"
+          :class="{ 'is-loaded': loaded }"
+          :src="tick ? bigSrc + '&r=' + tick : bigSrc"
+          :alt="photo.title"
+          decoding="async"
+          fetchpriority="high"
+          @load="loaded = true"
+          @error="failed = true"
+        />
+
+        <div v-if="!loaded && !failed" class="hint">
+          <span class="spin" aria-hidden="true"></span>
+          <span>正在加载大图…</span>
+        </div>
+
+        <div v-if="failed" class="err" role="button" tabindex="0" @click="retry" @keydown.enter.prevent="retry">
+          <span>大图加载失败</span>
+          <small>点击重试</small>
+        </div>
       </div>
+
       <figcaption class="cap">
         <h3>{{ photo.title }}</h3>
         <p>
@@ -100,7 +150,7 @@ onBeforeUnmount(() => {
 
 .box {
   margin: 0;
-  max-width: min(880px, 92vw);
+  width: min(880px, 92vw);
   max-height: 88vh;
   display: flex;
   flex-direction: column;
@@ -110,18 +160,83 @@ onBeforeUnmount(() => {
 }
 
 .pic {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 240px;
+  position: relative;
+  width: 100%;
   max-height: 68vh;
+  background: #201e1a;
   overflow: hidden;
 }
 
 .pic img {
-  max-width: 100%;
-  max-height: 68vh;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   display: block;
+}
+
+.thumb {
+  object-fit: cover;
+  filter: blur(16px);
+  transform: scale(1.08);
+  transition: opacity 0.3s ease;
+}
+
+.thumb.is-dim {
+  opacity: 0;
+}
+
+.full {
+  object-fit: contain;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.full.is-loaded {
+  opacity: 1;
+}
+
+.hint,
+.err {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #ded9cf;
+}
+
+.hint {
+  background: rgba(24, 22, 19, 0.45);
+}
+
+.spin {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(160, 155, 145, 0.35);
+  border-top-color: #8a8579;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.err {
+  background: #2a2722;
+  color: #ded9cf;
+  cursor: pointer;
+}
+
+.err small {
+  font-size: 10.5px;
+  color: #9d988d;
 }
 
 .cap {

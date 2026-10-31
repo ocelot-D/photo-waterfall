@@ -3,7 +3,7 @@ import { httpGet } from '../utils/request.js'
 import { debounce } from '../utils/debounce.js'
 import { resetImageStats } from '../utils/imageStats.js'
 
-export function usePhotoFeed() {
+export function usePhotoData() {
   const list = ref([])
   const tags = ref([])
   const total = ref(0)

@@ -1,7 +1,7 @@
 {
-  "name": "photofeed",
+  "name": "photo-waterfall",
   "version": "1.0.0",
-  "description": "PhotoFeed - 图片瀑布流社区（Vue 3 + Vite 前端 + Node 零依赖后端），主打页面性能优化",
+  "description": "Photo Waterfall - 图片瀑布流社区（Vue 3 + Vite 前端 + Node 零依赖后端），主打页面性能优化",
   "private": true,
   "type": "module",
   "scripts": {
